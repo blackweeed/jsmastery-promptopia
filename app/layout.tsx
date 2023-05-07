@@ -2,9 +2,11 @@ import { ReactNode } from "react";
 import "@/styles/globals.css";
 import Nav from "@components/Nav";
 import Provider from "@components/Provider";
+import { Session } from "next-auth";
 
 type Props = {
   children: ReactNode;
+  session: Session;
 };
 
 export const metadata = {
@@ -12,11 +14,11 @@ export const metadata = {
   description: "Discover and share AI prompts",
 };
 
-const RootLayout = ({ children }: Props) => {
+const RootLayout = ({ children, session }: Props) => {
   return (
     <html lang="en">
       <body>
-        <Provider>
+        <Provider session={session}>
           <div className="main">
             <div className="gradient"></div>
           </div>

@@ -3,11 +3,31 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { signIn, signOut, useSession, getProviders } from "next-auth/react";
+import {
+  signIn,
+  signOut,
+  useSession,
+  getProviders,
+  LiteralUnion,
+  ClientSafeProvider,
+} from "next-auth/react";
+import { BuiltInProviderType } from "next-auth/providers";
+
+interface Provider {
+  id: string;
+  name: string;
+  type: "oauth" | "saml" | "openid";
+  signinUrl: string;
+  callbackUrl: string;
+}
 
 const Nav = () => {
   const { data: session } = useSession();
-  const [providers, setProviders] = useState(null);
+  const [providers, setProviders] = useState<Record<
+    LiteralUnion<BuiltInProviderType, string>,
+    ClientSafeProvider
+  > | null>(null);
+
   const [toogleDropdown, setToggleDropDown] = useState(false);
 
   useEffect(() => {
@@ -19,6 +39,10 @@ const Nav = () => {
 
     setUpProviders();
   }, []);
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <nav className="flex-between w-full mb-16 pt-3">
@@ -40,12 +64,16 @@ const Nav = () => {
             <Link href="/create-prompt" className="black_btn">
               Create Post
             </Link>
-            <button type="button" onClick={signOut} className="outline_btn">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="outline_btn"
+            >
               Sign Out
             </button>
             <Link href="/profile">
               <Image
-                src={session?.user.image}
+                src={session?.user.image!}
                 width={37}
                 height={37}
                 className="rounded-full"
@@ -56,7 +84,7 @@ const Nav = () => {
         ) : (
           <>
             {providers &&
-              Object.values(providers).map((provider) => (
+              (Object.values(providers) as Provider[]).map((provider) => (
                 <button
                   type="button"
                   key={provider.name}
@@ -73,7 +101,7 @@ const Nav = () => {
         {session?.user ? (
           <div className="flex">
             <Image
-              src={session?.user.image}
+              src={session?.user.image!}
               width={37}
               height={37}
               className="rounded-full"
@@ -112,7 +140,7 @@ const Nav = () => {
         ) : (
           <>
             {providers &&
-              Object.values(providers).map((provider) => (
+              (Object.values(providers) as Provider[]).map((provider) => (
                 <button
                   type="button"
                   key={provider.name}
