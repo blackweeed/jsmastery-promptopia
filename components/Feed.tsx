@@ -7,7 +7,7 @@ import PromptCard from "./PromptCard";
 const PromptCardList = ({ data, handleTagClick }) => {
   return (
     <div className="mt-16 prompt_layout">
-      {data.map((post) => (
+      {data?.map((post) => (
         <PromptCard
           key={post._id}
           post={post}
@@ -21,8 +21,7 @@ const PromptCardList = ({ data, handleTagClick }) => {
 const Feed = () => {
   const [searchText, setSearchText] = useState("");
   const [posts, setPosts] = useState([]);
-
-  const handleSearchChange = (e) => {};
+  const [serchedItems, setSearchedItems] = useState(null);
 
   const fetchPosts = async () => {
     const response = await fetch("/api/prompt");
@@ -34,19 +33,35 @@ const Feed = () => {
     fetchPosts();
   }, []);
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchText("");
+    setSearchedItems(
+      posts.filter(
+        (item) => item.prompt === searchText || item.tag === searchText
+      )
+    );
+  };
+
+  const handleTagClick = (tag) => {
+    setSearchText(tag);
+  };
+
   return (
     <section className="feed">
-      <form className="relative w-full flex-center">
+      <form onSubmit={handleSearch} className="relative w-full flex-center">
         <input
           type="text"
           placeholder="Search for tag or username"
           value={searchText}
-          onChange={handleSearchChange}
-          required
+          onChange={(e) => setSearchText(e.target.value)}
           className="search_input peer"
         />
       </form>
-      <PromptCardList data={posts} handleTagClick={() => {}} />
+      <PromptCardList
+        data={serchedItems !== null ? serchedItems : posts}
+        handleTagClick={handleTagClick}
+      />
     </section>
   );
 };
